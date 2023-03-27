@@ -1,98 +1,102 @@
 # SQLite build scripts for Android
 
-This build scripts generate the following SQLite artifacts for Android:
+This repository contains scripts to generate the following SQLite artifacts for Android:
+- Statically Linked CLI (`sqlite3-static`)
+- Dynamically Linked CLI (`sqlite3-dynamic`)
+- Static Library (`libsqlite3.a`)
+- Dynamically Linked Shared Object Library (`libsqlite3.so`)
 
-* Statically Linked CLI
-  * sqlite3-static
+The compilation generates, with a single command, binaries for the following ABIs (each in a separate folder): `armeabi-v7a`, `arm64-v8a`, `x86`, `x86_64`.
 
-* Static Library
-  * libsqlite3.a
 
-* Dynamically Linked CLI
-  * sqlite3-dynamic
+## How to just download compiled binaries via Github Actions
 
-* Dynamically Linked Shared Object Library
-  * libsqlite3.so
+This project is automatically compiled at each commit via the GitHub workflows contained in the `.github` folder.
+It is possible to download compiled artifacts via the [Actions tab](https://github.com/jacopotediosi/sqlite3-android/actions).
 
-## Configure your environment
+If the artifacts are no longer downloadable because it's been more than 90 days since the last commit, *feel free to send a PR updating the sqlite version number*, so that I can approve it and run the generation of the new artifacts.
 
-* Get Android NDK and configure your environment so the command `ndk-build`
-  can be found in the PATH. This is a build dependency and is necessary to
-  cross-compile and build Android Native Code Applications:
+You can also fork and manually start workflows in your repository.
 
-https://developer.android.com/ndk/downloads/index.html
 
-## Update SQLite version if needed
+## How to update the sqlite version
 
-* No download is necessary, Makefile will take care of that for you. Use the
-  download link only to choose any `sqlite-amalgamation` version number and year:
-
-http://www.sqlite.org/download.html
-
-* Update Makefile with desired SQLite version and corresponding year. This will
-  be used to build the full download URL from SQLite site.
+Get the latest `sqlite-amalgamation` download link from [the official sqlite download page](http://www.sqlite.org/download.html).
+Extract year and version from it and put them into the Makefile as follows:
 
 ```bash
-  vi Makefile
+vi Makefile
 
-  ...
-  SQLITE_VERSION ?= 3160100
-  SQLITE_YEAR    ?= 2017
-  ...
+...
+SQLITE_VERSION ?= 3410200
+SQLITE_YEAR    ?= 2023
+...
 ```
 
-## Build/Compile
+It will take care to download and compile sources for you.
 
-* Make CLI and Library
 
-```bash
+## How to compile on your own
+
+- Install the [Android NDK](https://developer.android.com/ndk/downloads/index.html) and configure your environment so the command `ndk-build` can be found in the PATH.
+This is a build dependency and is necessary to cross-compile and build Android Native Code Applications.
+
+- Make CLI and Library:
+  ```bash
   make clean
   make
+  ```
 
-  * Expected output
+- Expected output:
+  ```bash
+  ...
+  [armeabi-v7a] Compile thumb  : sqlite3-dynamic-cli <= shell.c
+  [armeabi-v7a] Compile thumb  : sqlite3-dynamic-cli <= sqlite3.c
+  [armeabi-v7a] Compile thumb  : sqlite3-so <= sqlite3.c
+  [armeabi-v7a] SharedLibrary  : libsqlite3.so
+  [armeabi-v7a] Executable     : sqlite3-dynamic
+  [armeabi-v7a] Install        : sqlite3-dynamic => libs/armeabi-v7a/sqlite3-dynamic
+  [armeabi-v7a] Install        : libsqlite3.so => libs/armeabi-v7a/libsqlite3.so
+  [armeabi-v7a] Compile thumb  : sqlite3-static-cli <= shell.c
+  [armeabi-v7a] Compile thumb  : sqlite3-static-cli <= sqlite3.c
+  [armeabi-v7a] Compile thumb  : sqlite3-a <= sqlite3.c
+  [armeabi-v7a] StaticLibrary  : libsqlite3.a
+  [armeabi-v7a] Executable     : sqlite3-static
+  [armeabi-v7a] Install        : sqlite3-static => libs/armeabi-v7a/sqlite3-static
+  ...
+  ```
 
-  [armeabi] Compile thumb  : sqlite3-static-cli <= shell.c
-  [armeabi] Compile thumb  : sqlite3-static-cli <= sqlite3.c
-  [armeabi] Compile thumb  : sqlite3-a <= sqlite3.c
-  [armeabi] StaticLibrary  : libsqlite3.a
-  [armeabi] Executable     : sqlite3-static
-  [armeabi] Install        : sqlite3-static => libs/armeabi/sqlite3-static
 
-  [armeabi] Compile thumb  : sqlite3-dynamic-cli <= shell.c
-  [armeabi] Compile thumb  : sqlite3-dynamic-cli <= sqlite3.c
-  [armeabi] Compile thumb  : sqlite3-so <= sqlite3.c
-  [armeabi] SharedLibrary  : libsqlite3.so
-  [armeabi] Executable     : sqlite3-dynamic
-  [armeabi] Install        : sqlite3-dynamic => libs/armeabi/sqlite3-dynamic
-  [armeabi] Install        : libsqlite3.so => libs/armeabi/libsqlite3.so
-```
+## Artifacts location
 
-## Artifacts
+- CLI:
+  ```
+  libs/armeabi-v7a/sqlite3-static
+  libs/armeabi-v7a/sqlite3-dynamic
+  ... (other ABIs also) ...
+  ```
 
-* CLI
+- Library:
+  ```
+  obj/local/armeabi-v7a/libsqlite3.a
+  libs/armeabi-v7a/libsqlite3.so
+  ... (other ABIs also) ...
+  ```
+
+
+## How to push sqlite to your Android device
+
+Replacing `armeabi-v7a` with your needed ABI:
 
 ```bash
-  libs/armeabi/sqlite3-static
-  libs/armeabi/sqlite3-dynamic
-```
-
-* Library
-
-```bash
-  obj/local/armeabi/libsqlite3.a
-  libs/armeabi/libsqlite3.so
-```
-
-* You may now push SQLite to your Android device
-
-```bash
-  adb push libs/armeabi/sqlite3-static /sdcard/sqlite3
-  adb shell
-  mv /sdcard/sqlite3 /data/local/
-  chmod 755 /data/local/sqlite3
-  /data/local/sqlite3 -help
+adb push libs/armeabi-v7a/sqlite3-static /sdcard/sqlite3
+adb shell
+mv /sdcard/sqlite3 /data/local/
+chmod 755 /data/local/sqlite3
+/data/local/sqlite3 -help
 ```
 
 Note that paths and permissions may vary in your Android device or environment.
 
-Happy hacking!
+
+## Happy hacking!
