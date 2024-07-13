@@ -1,5 +1,15 @@
 # SQLite build scripts for Android
 
+<div align="center">
+<strong>
+<samp>
+
+[简体中文](README_zh.md) · [English](README.md)
+
+</samp>
+</strong>
+</div>
+
 This repository contains scripts to generate the following SQLite artifacts for Android:
 - Statically Linked CLI (`sqlite3-static`)
 - Dynamically Linked CLI (`sqlite3-dynamic`)
